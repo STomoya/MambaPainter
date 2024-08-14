@@ -11,7 +11,7 @@ Official implementation of "MambaPainter".
 
 ## Setup
 
-- Install dependencies. We assume that `torch` and `torchvision` is already installed. Checked that torch versions `2.2.2`, `2.3.x`, `2.4.0` is moving.
+- Install dependencies. We assume that `torch` and `torchvision` is already installed. Checked that torch versions `2.3.x`, `2.4.0` is moving.
 
     ```sh
     pip install -r requirements.txt
