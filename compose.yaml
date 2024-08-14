@@ -1,0 +1,40 @@
+services:
+  torch:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      args:
+        - BASE_TORCH_VERSION=2.2.2
+        - BASE_CUDA_VERSION=12.1
+        - BASE_CUDNN_VERSION=8
+        - UID=${UID}
+        - USERNAME=torchuser
+        - VMAMBA_COMMIT_HASH=${VMAMBA_COMMIT_HASH}
+
+    volumes:
+      - type: bind
+        source: .
+        target: ${WORKING_DIR}
+      - type: bind
+        source: ${DATASET_DIR}
+        target: ${WORKING_DIR}/data/
+
+    shm_size: '32gb'
+    init: true
+    working_dir: ${WORKING_DIR}
+    environment:
+      - CUDA_HOME=${CUDA_HOME}
+      - XDG_CACHE_HOME=${WORKING_DIR}/${XDG_CACHE_HOME}
+      - TORCH_EXTENSIONS_DIR=${WORKING_DIR}/${XDG_CACHE_HOME}/${TORCH_EXTENSIONS_DIR}
+      - TRITON_CACHE_DIR=${WORKING_DIR}/${XDG_CACHE_HOME}/triton
+    entrypoint: []
+    # command: ["/bin/bash", "./command.sh"]
+    user: ${UID:-1000}
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              device_ids: ['0']

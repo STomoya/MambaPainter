@@ -1,0 +1,61 @@
+
+env:
+  # recommended to keep as-is
+  strategy: none
+  mixed_precision: false
+  compile: false
+
+
+run:
+  name: renderer
+  folder: checkpoint
+  tag: date
+
+
+reproduce:
+  seed: 3407
+  use_deterministic_algorithms: true
+  warn_only: true
+  cudnn_benchmark: false
+
+
+data:
+  image_size: 128
+  param_dims: 5 # x, y, h, w, theta. RGB is not needed.
+
+  loader:
+    batch_size: 32
+    drop_last: true
+    pin_memory: false
+    shuffle: true
+
+model:
+  image_size: ${data.image_size}
+  param_dims: ${data.param_dims}
+  brush_dir: ./brushes
+  image_channels: 1
+
+optimizer:
+  lr: 0.0001
+  betas:
+  - 0.9
+  - 0.999
+
+train:
+  iterations: 200000
+
+  stroke_lambda: 1.0
+  lpips_lambda: 1.0
+  alpha_lambda: 1.0
+
+log:
+  log_file: log.log
+  log_interval: 50
+  ckpt_keep_last: 1
+  logger_name: ${run.name}
+
+save:
+  _every: 10000
+  ckpt_every: ${save._every}
+  snap_every: ${save._every}
+  running: 100

@@ -1,0 +1,37 @@
+line-length = 120
+indent-width = 4
+
+target-version = "py310"
+
+exclude = ['Compositional_Neural_Painter', 'PaintTransformer', 'Im2Oil']  # Thirdparty git repos.
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "F403", "F405"]
+
+[lint]
+select = [
+    "B",
+    "E",
+    "F",
+    "C4",
+    "SIM",
+    "W",
+    "NPY",
+    "PIE",
+    "PL",
+    "PYI",
+    "RUF",
+    "TRY"
+]
+ignore = [
+    "C408",    # dict() statement. I like dict().
+    "PLR",     # to many...
+    "TRY002",  # Create Exception class.
+    "TRY003",  # Long message outside exception class.
+    "NPY002",  # numpy.random.Generator. Most torch programs use np.random.seed().
+    "PLR0402", # import torch.nn as nn -> from torch import nn.
+    "SIM108",  # if: a=...; else: a=... -> a = ... if else ...;. I like using if-else in some cases.
+]
+
+[format]
+quote-style = "single"

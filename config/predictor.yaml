@@ -1,0 +1,89 @@
+env:
+  # recommended to keep as-is
+  strategy: none
+  mixed_precision: false
+  compile: false
+
+
+run:
+  name: predictor
+  folder: checkpoint
+  tag: date
+
+
+reproduce:
+  seed: 3407
+  use_deterministic_algorithms: true
+  warn_only: true
+  cudnn_benchmark: false
+
+
+data:
+  image_dir: /workspace/data/imagenet/train
+  image_size: 128
+  param_dims: 8 # x, y, h, w, theta, R, G, B.
+
+  loader:
+    batch_size: 16
+    drop_last: true
+    pin_memory: false
+    shuffle: true
+
+
+model:
+  d_model: 256
+  n_strokes: 100
+  n_params: ${data.param_dims}
+  n_layer: 12
+  rms_norm: false
+  residual_in_fp32: true
+  fused_add_norm: true
+  cross_attn_first: true
+  identical_stroke_token: false
+  ssm_layer: Mamba2
+  ssm_d_state: 128  # This should be adjusted when switching Mamba versions.
+  encoder_patch_size: 4
+  encoder_image_size: 128
+  encoder_depths: [2, 2, 2]
+  encoder_dims: [64, 128, 256]
+
+
+discriminator:
+  channels: 768
+
+
+renderer:
+  config: ./checkpoint/renderer.20240811102551/config.yaml
+  pretrained: ./checkpoint/renderer.20240811102551/last-model.pt
+
+
+optimizer:
+  lr: 0.0001
+  betas:
+  - 0.9
+  - 0.999
+
+
+train:
+  iterations: 200000
+
+  gan_lambda: 0.1
+  gp_lambda: 1.0
+  pixel_lambda: 1.0
+  gan_from: 100000
+
+  rendering_batch_size: 100
+  batch_iterations: 1
+
+log:
+  log_file: log.log
+  log_interval: 50
+  ckpt_keep_last: 1
+  logger_name: ${run.name}
+
+
+save:
+  _every: 10000
+  ckpt_every: ${save._every}
+  snap_every: ${save._every}
+  running: 100
