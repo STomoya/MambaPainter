@@ -3,6 +3,8 @@
 Based on Zigma architecture.
 """
 
+from __future__ import annotations
+
 import math
 from functools import partial
 

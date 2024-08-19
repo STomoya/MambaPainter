@@ -3,9 +3,10 @@ import os
 from typing import Callable
 
 import torch
-import torchutils
 from PIL import Image
 from torch.utils.data import Dataset
+
+import torchutils
 
 
 class RandomDataset(Dataset):

@@ -10,6 +10,8 @@
 3-6 is done iteratively.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import math
@@ -20,12 +22,13 @@ from dataclasses import dataclass
 import torch
 import torch.nn.functional as F
 import torchvision.transforms.v2.functional as TF
-from mambapainter.models.predictor import MambaStrokePredictor
-from mambapainter.models.renderer import Renderer
 from omegaconf import OmegaConf
 from PIL import Image
-from torchutils import get_logger
 from torchvision.utils import save_image
+
+from mambapainter.models.predictor import MambaStrokePredictor
+from mambapainter.models.renderer import Renderer
+from torchutils import get_logger
 
 
 def load_image(path: str, size: int, device: str = 'cuda'):

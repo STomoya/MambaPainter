@@ -4,11 +4,12 @@ import os
 
 import lpips
 import torch
+from torchvision.utils import save_image
+
 import torchutils
 from mambapainter.data import RandomDataset
 from mambapainter.models.renderer import FCN
 from mambapainter.utils import init_run, make_image_grid, to_object
-from torchvision.utils import save_image
 
 
 def train_renderer():

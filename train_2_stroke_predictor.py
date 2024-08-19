@@ -3,16 +3,17 @@
 import os
 
 import torch
-import torchutils
 import torchvision.transforms.v2 as T
+from omegaconf import OmegaConf
+from torchvision.utils import save_image
+
+import torchutils
 from mambapainter import loss as gan_loss_fn
 from mambapainter.data import ImageFolder
 from mambapainter.models.discriminator import Discriminator
 from mambapainter.models.predictor import MambaStrokePredictor
 from mambapainter.models.renderer import FCN
 from mambapainter.utils import init_run, make_image_grid, to_object
-from omegaconf import OmegaConf
-from torchvision.utils import save_image
 
 
 def train():

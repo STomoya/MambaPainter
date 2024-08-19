@@ -5,6 +5,8 @@ MIT License
 Copyright (c) 2024 MzeroMiko
 """
 
+from __future__ import annotations
+
 import math
 from collections import OrderedDict
 from functools import partial
