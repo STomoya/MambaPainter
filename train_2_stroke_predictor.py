@@ -156,7 +156,7 @@ def train():
                     model=[cmodel, cdisc_model],
                     optimizer=[optimizer, disc_optim],
                     grad_scaler=grad_scaler,
-                    others={'batches_done': 0},
+                    others={'batches_done': batches_done},
                 )
                 kbatches = f'{batches_done/1000:.2f}k'
                 torchutils.save_model(folder, model, f'{kbatches}.pt')
