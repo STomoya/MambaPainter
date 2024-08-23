@@ -247,7 +247,7 @@ def render_image(
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('model_folder', help='Path to the folder of saved checkpoints.')
-    parser.add_argument('input', help='Input filename.')
+    parser.add_argument('input', help='Input filename.', nargs='+')
     parser.add_argument('--output', '-o', default='.', help='Output results to.')
 
     parser.add_argument('--params', help='Path to saved parameters.')
@@ -310,86 +310,87 @@ def main():
     ), 'GPU is required because VMamba, which we use for the image encoder, does not have a CPU implementation. Abort.'
     device = torch.device('cuda')
 
-    stem = os.path.splitext(os.path.basename(args.input))[0]
-
-    # save auguments as json.
-    with open(os.path.join(args.output, f'{stem}.args.json'), 'w') as fp:
-        json.dump(args.__dict__, fp, indent=2)
-
     logger.info('Loading model. This will take some time to build triton kernels if --params is not given.')
     renderer, predictor = prepare_models(args.model_folder, device, build_triton=args.params is None)
     logger.info('Loaded model.')
 
-    image = load_image(args.input, args.image_size, device)
+    for path in args.input:
+        stem = os.path.splitext(os.path.basename(path))[0]
 
-    image_patchs = create_image_patches(image, args.patch_size, overlap_pixels=args.overlap_pixels)
-    logger.info(f'Image patches:\n{image_patchs}')
-    if args.save_all or args.save_patches:
-        filename = os.path.join(args.output, f'{stem}.patches.png')
-        save_image(image_patchs.data, filename, pad_value=255, nrow=image_patchs.nrow)
-        logger.info(f'Saved image patches to {filename}.')
+        # save auguments as json.
+        with open(os.path.join(args.output, f'{stem}.args.json'), 'w') as fp:
+            json.dump(args.__dict__, fp, indent=2)
 
-    # Measure time.
-    torch.cuda.synchronize()
-    inference_start = time.time()
+        image = load_image(path, args.image_size, device)
 
-    stroke_scale = 1 - (args.stroke_padding / predictor.image_size)
+        image_patchs = create_image_patches(image, args.patch_size, overlap_pixels=args.overlap_pixels)
+        logger.info(f'Image patches:\n{image_patchs}')
+        if args.save_all or args.save_patches:
+            filename = os.path.join(args.output, f'{stem}.patches.png')
+            save_image(image_patchs.data, filename, pad_value=255, nrow=image_patchs.nrow)
+            logger.info(f'Saved image patches to {filename}.')
 
-    # predict params (or load saved parameters.)
-    params = None
-    if args.params is not None:
-        try:
-            params = torch.load(args.params, map_location=device)
-            logger.info(f'Loaded saved parameters from {args.params}.')
-        except Exception as e:
-            logger.warn(f'Could not load parameters. Error message: "{e!s}". Predicting parameters from image.')
-    if params is None:
-        params = predict_strokes(image_patchs, predictor, args.batch_size, stroke_scale)
-        logger.info('Predicted parameters.')
+        # Measure time.
+        torch.cuda.synchronize()
+        inference_start = time.time()
 
-    # render parameters.
-    output, progress = render_image(
-        params, renderer, image_patchs, stroke_scale, args.merge_every, return_progress=True
-    )
-    logger.info('Rendered image.')
+        stroke_scale = 1 - (args.stroke_padding / predictor.image_size)
 
-    # Log time.
-    torch.cuda.synchronize()
-    inference_duration = time.time() - inference_start
-    logger.info(f'Duration: {inference_duration:.5f} sec.')
+        # predict params (or load saved parameters.)
+        params = None
+        if args.params is not None:
+            try:
+                params = torch.load(args.params, map_location=device)
+                logger.info(f'Loaded saved parameters from {args.params}.')
+            except Exception as e:
+                logger.warn(f'Could not load parameters. Error message: "{e!s}". Predicting parameters from image.')
+        if params is None:
+            params = predict_strokes(image_patchs, predictor, args.batch_size, stroke_scale)
+            logger.info('Predicted parameters.')
 
-    # save result.
-    filename = os.path.join(args.output, f'{stem}.oilpaint.png')
-    save_image(output, filename, normalize=False)
-    logger.info(f'Translated image saved to {filename}.')
-
-    # save timelapse.
-    if args.save_all or args.save_timelapse:
-        logger.info('Saving timelapse. This might take some time...')
-
-        progress_images = []
-        for p in progress:
-            # From `torchvision.utils.save_image()`
-            p_ndarr = p.squeeze().mul(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to('cpu', torch.uint8).numpy()
-            image = Image.fromarray(p_ndarr)
-            progress_images.append(image)
-
-        filename = os.path.join(args.output, f'{stem}.timelapse.gif')
-        progress_images[0].save(
-            filename,
-            save_all=True,
-            append_images=progress_images[1:],
-            optimize=args.gif_optimize,
-            duration=args.gif_duration,
-            loop=args.gif_loop,
+        # render parameters.
+        output, progress = render_image(
+            params, renderer, image_patchs, stroke_scale, args.merge_every, return_progress=True
         )
-        logger.info(f'Saved timelapse GIF to {filename}.')
+        logger.info('Rendered image.')
 
-    # save predicted parameters.
-    if args.save_all or args.save_parameters:
-        filename = os.path.join(args.output, f'{stem}.parameters.pt')
-        torch.save(params.cpu(), filename)
-        logger.info(f'Saved predicted parameters to {filename}.')
+        # Log time.
+        torch.cuda.synchronize()
+        inference_duration = time.time() - inference_start
+        logger.info(f'Duration: {inference_duration:.5f} sec.')
+
+        # save result.
+        filename = os.path.join(args.output, f'{stem}.oilpaint.png')
+        save_image(output, filename, normalize=False)
+        logger.info(f'Translated image saved to {filename}.')
+
+        # save timelapse.
+        if args.save_all or args.save_timelapse:
+            logger.info('Saving timelapse. This might take some time...')
+
+            progress_images = []
+            for p in progress:
+                # From `torchvision.utils.save_image()`
+                p_ndarr = p.squeeze().mul(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to('cpu', torch.uint8).numpy()
+                image = Image.fromarray(p_ndarr)
+                progress_images.append(image)
+
+            filename = os.path.join(args.output, f'{stem}.timelapse.gif')
+            progress_images[0].save(
+                filename,
+                save_all=True,
+                append_images=progress_images[1:],
+                optimize=args.gif_optimize,
+                duration=args.gif_duration,
+                loop=args.gif_loop,
+            )
+            logger.info(f'Saved timelapse GIF to {filename}.')
+
+        # save predicted parameters.
+        if args.save_all or args.save_parameters:
+            filename = os.path.join(args.output, f'{stem}.parameters.pt')
+            torch.save(params.cpu(), filename)
+            logger.info(f'Saved predicted parameters to {filename}.')
 
     logger.info('Successfully done. Exiting.')
 

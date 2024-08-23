@@ -79,7 +79,7 @@ You can also download pretrained files from [GDrive]() or [Huggingface](). Creat
 ```sh
 python multi_patch_inference_fast.py \
     <path/to/trained/folder> \
-    <path/to/image.jpg> \
+    <path/to/image.jpg> <mutliple/images/can/be/provided.png> \
     --output . \
     --image-size 512 \
     --patch-size 64 \
