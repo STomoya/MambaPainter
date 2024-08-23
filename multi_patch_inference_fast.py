@@ -222,17 +222,17 @@ def render_image(
     stroke_scale: float,
     merge_every: int = 10,
     return_progress: bool = True,
+    antialias: bool = True,
 ):
-    # NOTE: renderer on bigger size so that we can avoid resizing which cause aliasing.
-    #       resizing after rendering will be more efficient, but with lower reconstruction quality.
-    #       maybe make this optional?
     patch_size = int(image_patches.pad_size / stroke_scale)
     patch_size += 1 if patch_size % 2 == 1 else 0
 
     output = 0
     progress = []
     for param_batch in params.split(merge_every, dim=1):
-        rendered_patches = renderer.render_parameters(param_batch, image_size=patch_size)
+        rendered_patches = renderer.render_parameters(param_batch, image_size=patch_size if antialias else None)
+        if not antialias:
+            rendered_patches = F.interpolate(rendered_patches, (patch_size, patch_size), mode='nearest')
         temp_output = merge_patches(rendered_patches, image_patches, patch_size)
         alpha = (temp_output > 0).float()
         output = output * (1 - alpha) + temp_output * alpha
