@@ -89,6 +89,10 @@ python multi_patch_inference_fast.py \
 
 The script will automatically create the translated image and a JSON file containing the command line arguments. You can add the `--save-all` option to save an image of patches used in the translation, predicted stroke parameters, and a timelapse GIF.
 
+### Notes on speed
+
+We use Mamba2 layers, which heavily relies on `triton`. Thus, when translating only one image you will encounter slow translation speed. You will see the proper speed after the second image when translating multiple images with one command.
+
 <details>
 <summary>Help</summary>
 
