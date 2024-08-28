@@ -92,13 +92,13 @@ def train():
         for batch in dataset:
             gt_pixels = batch.to(device)
 
-            pred_params = model(gt_pixels)  # [B,L,8]
+            pred_params = cmodel(gt_pixels)  # [B,L,8]
             pred_pixels = renderer.neural_render_parameters(pred_params, batch_size=config.train.rendering_batch_size)
 
             pixel_loss = pixel_loss_fn(pred_pixels, gt_pixels) * config.train.pixel_lambda
             g_gan_loss = balanced_g_loss = 0
             if batches_done > config.train.gan_from:
-                pred_logits = disc_model(pred_pixels)
+                pred_logits = cdisc_model(pred_pixels)
                 g_gan_loss = gan_loss_fn.ns_g_loss(pred_logits)
                 balanced_g_loss = (
                     g_gan_loss / g_gan_loss.detach().clone() * pixel_loss.detach().clone() * config.train.gan_lambda
@@ -117,8 +117,8 @@ def train():
                 disc_gt_pixels = gt_pixels
                 disc_gt_pixels = gan_loss_fn.prepare_input(disc_gt_pixels)
 
-                gt_logits = disc_model(disc_gt_pixels)
-                pred_logits = disc_model(pred_pixels.detach())
+                gt_logits = cdisc_model(disc_gt_pixels)
+                pred_logits = cdisc_model(pred_pixels.detach())
 
                 d_gan_loss = gan_loss_fn.ns_d_loss(gt_logits, pred_logits)
                 gp_loss = gan_loss_fn.r1_regularization(gt_logits, disc_gt_pixels, grad_scaler) * config.train.gp_lambda
