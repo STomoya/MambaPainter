@@ -91,7 +91,7 @@ The script will automatically create the translated image and a JSON file contai
 
 ### Notes on speed
 
-We use Mamba2 layers, which heavily relies on `triton`. Thus, when translating only one image you will encounter slow translation speed. You will see the proper speed after the second image when translating multiple images with one command.
+We use Mamba2 layers, which heavily relies on `triton`. Thus, when translating only one image you will encounter slow translation speed. You will see the proper speed after the second image when translating multiple images with one command. For a reference, we included the source code used to calculate the scores reported in our paper [here](./test/test_dataset.py).
 
 <details>
 <summary>Help</summary>
