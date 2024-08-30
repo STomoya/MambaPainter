@@ -73,7 +73,7 @@ The configuration is done using the [hydra](https://hydra.cc/) package.
 
 Use the checkpoint folder created above as `<path/to/trained/folder>` in the command below.
 
-You can also download pretrained files from [GDrive]() or [Huggingface](). Create a folder and place the downloaded `config.yaml` and `model.pt` inside. Use the created folder as `<path/to/trained/folder>` in the command below.
+You can also download pretrained files from [GDrive](https://drive.google.com/drive/folders/1ldQ-Oz3uxd0f8p38cMxoX0fn9hx9ZBvG?usp=sharing) or [Huggingface](https://huggingface.co/STomoya/MambaPainter). Create a folder and place the downloaded `config.yaml` and `last-model.pt` inside. Use the created folder as `<path/to/trained/folder>` in the command below.
 
 
 ```sh
