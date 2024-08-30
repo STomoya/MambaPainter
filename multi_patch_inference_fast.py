@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import argparse
+import glob
 import json
 import math
 import os
@@ -28,7 +29,7 @@ from torchvision.utils import save_image
 
 from mambapainter.models.predictor import MambaStrokePredictor
 from mambapainter.models.renderer import Renderer
-from torchutils import get_logger
+from torchutils import get_logger, natural_sort
 
 
 def load_image(path: str, size: int, device: str = 'cuda'):
@@ -127,7 +128,7 @@ def freeze(model: torch.nn.Module):
 
 
 def prepare_models(
-    checkpoint_folder: str, device: torch.device, build_triton: bool = False, last_model: bool = True
+    checkpoint_folder: str, device: torch.device, build_triton: bool = False
 ) -> tuple[Renderer, MambaStrokePredictor]:
     config_file = os.path.join(checkpoint_folder, 'config.yaml')
     config = OmegaConf.load(config_file)
@@ -136,11 +137,12 @@ def prepare_models(
     config.model.pop('builder', None)
     predictor = MambaStrokePredictor(**config.model)
 
-    # loss.torch is almost always the model trained only on MSE.
-    # final-model.torch
-    state_dict_file = os.path.join(checkpoint_folder, 'last-model.torch' if last_model else 'loss.torch')
-    if last_model and not os.path.exists(state_dict_file):
-        state_dict_file = os.path.join(checkpoint_folder, 'loss.torch')
+    # Try loading last model.
+    state_dict_file = os.path.join(checkpoint_folder, 'last-model.pt')
+    # If not exists, list intermediate files and take the latest.
+    if not os.path.exists(state_dict_file):
+        inter_state_files = glob.glob(os.path.join(checkpoint_folder, '*k.pt'))
+        state_dict_file = natural_sort(inter_state_files)[-1]
 
     state_dict = torch.load(state_dict_file, map_location='cpu')
     state_dict = state_dict.get('state_dict', state_dict)
