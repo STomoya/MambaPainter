@@ -133,7 +133,7 @@ def prepare_models(
     config = OmegaConf.load(config_file)
 
     renderer = Renderer()
-    config.model.pop('builder')
+    config.model.pop('builder', None)
     predictor = MambaStrokePredictor(**config.model)
 
     # loss.torch is almost always the model trained only on MSE.
