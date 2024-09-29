@@ -1,9 +1,9 @@
 
 # MambaPainter
 
-Official implementation of "MambaPainter".
+Official implementation of "MambaPainter: Neural Stroke-Based Rendering in a Single Step."
 
-[Paper]() | [Code](https://github.com/STomoya/MambaPainter)
+[Paper](https://doi.org/10.1145/3681756.3697906) | [Code](https://github.com/STomoya/MambaPainter)
 
 <div align="center">
     <img src="assets/results.png">
@@ -137,7 +137,19 @@ options:
 ## Citation
 
 ```bibtex
-@proceedings{aaa,
-    title  =  {},
+@inproceedings{10.1145/3681756.3697906,
+    author    = {Sawada, Tomoya and Katsurai, Marie},
+    title     = {MambaPainter: Neural Stroke-Based Rendering in a Single Step},
+    year      = {2024},
+    isbn      = {9798400711381},
+    publisher = {Association for Computing Machinery},
+    address   = {New York, NY, USA},
+    url       = {https://doi.org/10.1145/3681756.3697906},
+    doi       = {10.1145/3681756.3697906},
+    booktitle = {SIGGRAPH Asia 2024 Posters},
+    articleno = {1},
+    numpages  = {2},
+    location  = {Tokyo, Japan},
+    series    = {SA Posters ’24},
 }
 ```
