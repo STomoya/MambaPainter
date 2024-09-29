@@ -153,3 +153,11 @@ options:
     series    = {SA Posters ’24},
 }
 ```
+
+## Acknowledgments
+
+We thank the contributors of [mamba/mamba2](https://github.com/state-spaces/mamba) and [VMamba](https://github.com/MzeroMiko/VMamba) for publishing their work. We also thank the contributors of [Compositional Neural Painter](https://github.com/sjtuplayer/Compositional_Neural_Painter) and [PaintTransformer](https://github.com/Huage001/PaintTransformer), which we heavily referenced to implement the parametric rendering of stroke parameters.
+
+## Author(s)
+
+[Tomoya Sawada](https://github.com/STomoya)
